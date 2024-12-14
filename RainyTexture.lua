@@ -90,13 +90,12 @@ function RainyTexture.CreateTexture(texture, trailTail, spawnColor, spawnChance,
         
         -- Paint over already faded pixels at the bottom
 		for i = self.fadedCounter, 0, -1 do
-			local colorFadeFactor = (i) / handler.trailLength
 			local fadeFactor = (self.fadedCounter - i) / handler.trailLength
 			local fadedColor = vec(
-				self.clearRgba.x * (1 - colorFadeFactor),
-				self.clearRgba.y * (1 - colorFadeFactor),
-				self.clearRgba.z * (1 - colorFadeFactor),
-				self.clearRgba.w * (fadeFactor - 1)
+				self.clearRgba.x * (1 + (fadeFactor - 1)),
+				self.clearRgba.y * (1 + (fadeFactor - 1)),
+				self.clearRgba.z * (1 + (fadeFactor - 1)),
+				self.clearRgba.w * (1 + (fadeFactor - 1))
 			)
 			handler.rainyTexture:setPixel(self.x, textureHeight - i, fadedColor)
 		end
@@ -194,6 +193,12 @@ function RainyTexture.CreateTexture(texture, trailTail, spawnColor, spawnChance,
 	---@param newCooldownMax New max spawn tick timer
     function handler.updateSpawnCooldownMax(newCooldownMax)
         handler.spawnCooldownMax = newCooldownMax
+    end
+	
+	--- Updates the tick spped 
+	---@param newCooldownMax New tick speed
+    function handler.updateSpawnCooldownMax(newTickSpeed)
+        handler.tickSpeed = newTickSpeed
     end
 
     return handler
