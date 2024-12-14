@@ -7,9 +7,10 @@ local RainyTexture = {}
 ---@param spawnChance The chance to spawn a raindrop every attempt (0 - 1)
 ---@param spawnCooldownMin Minimum ticks for an attempt at spawn to happen
 ---@param spawnCooldownMax Maximum ticks for an attempt at spawn to happen
+---@param tickSpeed This will divide each column into a different tickrate, in other word: 1 means all columns update at the same time, 2 means each pair will have its columns working on different timeframes, 3 means each tripplet... Reduces speed and tick cost but causes desync between columnns
 ---@param createColumns Optional boolean list to skip some columns in the texture. Ej: { true, false, false, false, false, false, false, true}
 ---@return SwingHandler
-function RainyTexture.CreateTexture(texture, trailTail, spawnColor, spawnChance, spawnCooldownMin, spawnCooldownMax, createColumns)
+function RainyTexture.CreateTexture(texture, trailTail, spawnColor, spawnChance, spawnCooldownMin, spawnCooldownMax, tickSpeed, createColumns)
     local handler = {}
 	-- Column class
     local Column = {}
@@ -22,13 +23,16 @@ function RainyTexture.CreateTexture(texture, trailTail, spawnColor, spawnChance,
     handler.spawnChance = spawnChance or 0.1
     handler.spawnCooldownMin = spawnCooldownMin or 10
     handler.spawnCooldownMax = spawnCooldownMax or 20
-    handler.Columns = {}
+	handler.tickSpeed = tickSpeed or 1
     handler.createColumns = createColumns or nil
+	
 	
 	-->>>>>>>>>>>>>>>>>>>>>>>>> Local variables
 	
+	handler.Columns = {}
     local textureHeight = texture:getDimensions().y - 1
     local textureWidth = texture:getDimensions().x - 1
+	local tickCounter = 0
 
     
     
@@ -117,11 +121,14 @@ function RainyTexture.CreateTexture(texture, trailTail, spawnColor, spawnChance,
     
 	--- Minecraft tick loop
 	function events.tick()
+		tickCounter = tickCounter + 1
         for _, column in ipairs(handler.Columns) do
-            column:update()
+            if ((tickCounter + _) % handler.tickSpeed) == 0 then
+                column:update()
+            end
         end
-		
-		-- Update the texture in memory to reflect all changes
+        
+        -- Update the texture in memory to reflect all changes
         handler.rainyTexture:update()
     end
 
